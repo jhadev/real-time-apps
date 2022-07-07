@@ -32,12 +32,49 @@ async function postNewMsg(user, text) {
 }
 
 async function getNewMsgs() {
-  /*
-   *
-   * code goes here
-   *
-   */
+  let reader;
+  const utfDecoder = new TextDecoder("utf-8");
+  try {
+    const res = await fetch("/msgs");
+    // get Reader turns reader into a reasonable text stream
+    reader = res.body.getReader();
+  } catch (error) {
+    console.log("connection error ", e);
+  }
+  // res.json can never stream
+  presence.innerText = `🔵`;
+
+  // do loop should run indefienitely   `
+  do {
+    let readerResponse;
+    let done;
+    try {
+      // wait here until reader has something to read
+      readerResponse = await reader.read();
+      const chunk = utfDecoder.decode(readerResponse.value, { stream: true });
+      console.log(chunk);
+    } catch (error) {
+      console.error("reader fail", e);
+      presence.innerText = `failed`;
+      return;
+    }
+
+    done = readerResponse.done;
+    const chunk = utfDecoder.decode(readerResponse.value, { stream: true });
+
+    if (chunk) {
+      try {
+        const json = JSON.parse(chunk);
+        allChat = json.msg;
+        render();
+      } catch (error) {
+        console.error("parse error ", error);
+      }
+    }
+  } while (!done);
+  presence.innerText = `failed`;
 }
+// HTTP2 IS UNIDIRECTIONAL, WEB SOCKETS ARE BI DIRECTIONAL
 
 function render() {
   const html = allChat.map(({ user, text, time, id }) =>
