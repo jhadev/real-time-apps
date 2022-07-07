@@ -24,7 +24,7 @@ app.get("/poll", function (req, res) {
 });
 
 app.post("/poll", function (req, res) {
-  const { user, text } = req.body;
+  const { user, text } = req.bod;
 
   msg.push({
     user,
@@ -33,7 +33,7 @@ app.post("/poll", function (req, res) {
   });
 
   res.json({
-    status: "ok",
+    status: msg,
   });
 });
 
