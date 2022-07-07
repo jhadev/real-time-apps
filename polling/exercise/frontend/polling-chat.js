@@ -1,3 +1,10 @@
+// BACKOFF & RETRY
+
+// RETRY - if a request fails, keep trying until it resolves. Can resut in DDOSing yourself on large sites if site is experiencing server issues,
+// BACKOFF - 500 => 500 try again at twice the interval 0, 3. 6, 12, 24 (exponential backoff) if multiple consecutive failures as success becomes for likely.
+// some sites use retry button for user to request immediately, user won't stop clicking button, manual DDOS
+// hinder button presses to avoid
+
 const chat = document.getElementById("chat");
 const msgs = document.getElementById("msgs");
 
@@ -38,14 +45,21 @@ async function getNewMsgs() {
   // write code here
   let json;
   try {
+    // throws an error if it won't connect not 500
     const res = await fetch("/poll");
     json = await res.json();
+    // handling done in one place
+    if (res.status >= 400) {
+      throw new Error("request did not succeed " + res.status);
+    }
+
+    allChat = json.msg;
+    render();
+    failedTries = 0;
   } catch (e) {
     console.error("polling error", e);
+    failedTries++;
   }
-
-  allChat = json.msg;
-  render();
 }
 
 function render() {
@@ -60,15 +74,22 @@ function render() {
 // given a user and a msg, it returns an HTML string to render to the UI
 const template = (user, msg) =>
   `<li class="collection-item"><span class="badge">${user}</span>${msg}</li>`;
+
+// linear backoff
+const BACKOFF = 5000;
+
 // set to 0 to fetch all previous messages
 let timeToMakeNextRequest = 0;
+let failedTries = 0;
 async function raftTimer(time) {
   if (timeToMakeNextRequest <= time) {
     console.log(time); //ms since it started running ~10ms since browser has started
     await getNewMsgs();
     // want to wait for getNewMsgs to finish
     // time can be an issue because
-    timeToMakeNextRequest = time + INTERVAL;
+    // if success failedTries = 0 x INTERVAL 5000 = 0
+    // do expontential here as well
+    timeToMakeNextRequest = time + INTERVAL + failedTries + BACKOFF;
   }
 
   requestAnimationFrame(raftTimer);
@@ -82,3 +103,7 @@ requestAnimationFrame(raftTimer);
 // eventually over time when using
 
 // requestAnimationFrame should be called scheduleInTheFuture
+
+// PRODUCT ADVICE - IF A USER REUQEST FAILS IMMEDIATELY TRY AGAIN
+// WAIT A SHORT TIME AND TRY AGAIN
+// IF 3 REQUESTS FAIL IN A ROW BACK OFF AGGRESSIVELY

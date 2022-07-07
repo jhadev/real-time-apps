@@ -23,6 +23,7 @@ app.use(express.static("frontend"));
 app.get("/poll", function (req, res) {
   // use getMsgs to get messages to send back
   // write code here
+  // res.status(500).json to simulate backff
   res.json({
     msg: getMsgs(),
   });
