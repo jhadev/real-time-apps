@@ -2,6 +2,8 @@
 - polling
 - backoff and retry
 - http2
+- raw-sockets
+- socket.io
 
 Finshed course - https://frontendmasters.com/courses/realtime/raw-websockets-setup/=
 git 
