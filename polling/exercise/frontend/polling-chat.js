@@ -46,8 +46,6 @@ async function getNewMsgs() {
 
   allChat = json.msg;
   render();
-  // set interval would not wait until above is finshed s
-  setTimeout(getNewMsgs, INTERVAL);
 }
 
 function render() {
@@ -62,6 +60,25 @@ function render() {
 // given a user and a msg, it returns an HTML string to render to the UI
 const template = (user, msg) =>
   `<li class="collection-item"><span class="badge">${user}</span>${msg}</li>`;
+// set to 0 to fetch all previous messages
+let timeToMakeNextRequest = 0;
+async function raftTimer(time) {
+  if (timeToMakeNextRequest <= time) {
+    console.log(time); //ms since it started running ~10ms since browser has started
+    await getNewMsgs();
+    // want to wait for getNewMsgs to finish
+    // time can be an issue because
+    timeToMakeNextRequest = time + INTERVAL;
+  }
 
-// make the first request
-getNewMsgs();
+  requestAnimationFrame(raftTimer);
+}
+
+// GETS CALLED A TON, DON"T USE COMPLEX LOGIC
+// requestAnimationFrame executes when the main thread is idle
+// setTimeout will pause everything else
+requestAnimationFrame(raftTimer);
+
+// eventually over time when using
+
+// requestAnimationFrame should be called scheduleInTheFuture
