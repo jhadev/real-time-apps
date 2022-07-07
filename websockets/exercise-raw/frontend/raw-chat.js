@@ -11,14 +11,33 @@ chat.addEventListener("submit", function (e) {
 });
 
 async function postNewMsg(user, text) {
-  // code goes here
+  const data = { user, text };
+  ws.send(JSON.stringify(data));
+  // sent as buffer frames
 }
+// browser api - ws protocol for websockets -
+// protocols to deal on - json - passes to server to let it know what it is coming
+// minimal config from client side
+const ws = new WebSocket("ws://localhost:8080", ["json"]);
+// on open run this function
+ws.addEventListener("open", () => {
+  console.log("connected");
+  presence.innerText = "CONNECTED";
+});
 
-/*
- *
- * your code goes here
- *
- */
+// accept message
+ws.addEventListener("message", (e) => {
+  // parse it
+  const data = JSON.parse(e.data);
+  // grab info you want
+  allChat = data.msg;
+  // call render
+  render();
+});
+
+ws.addEventListener("close", () => {
+  presence.innerText = "SOCKET CLOSED";
+});
 
 function render() {
   const html = allChat.map(({ user, text }) => template(user, text));

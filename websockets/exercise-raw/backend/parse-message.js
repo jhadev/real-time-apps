@@ -1,6 +1,15 @@
 function parseMessage(buffer) {
+  // takes in buffer and translates it back into text
+  // ex: <Buffer 81 9f fc 8a 6d 8e 87 a8 18 fd 99 f8 4f b4 de f9 0b ea 9a f9 4f a2 de fe 08 f6 88 a8 57 ac 99 f8 1f eb 88 a8 10>
+  // read firstByte
   const firstByte = buffer.readUInt8(0);
-  const opCode = firstByte & 0xf;
+  // logical & bitwise operator -
+  const opCode = firstByte & 0xf; // hexademical 16
+  /* 
+  0b10010011 & 0b00010010
+  product of these would be
+  0b000100010 
+  */
 
   if (opCode === 8) {
     // connection closed
@@ -10,6 +19,7 @@ function parseMessage(buffer) {
     // we only care about text frames
     return;
   }
+  // only care about text frames which is opCode 1
 
   const secondByte = buffer.readUInt8(1);
   const isMasked = secondByte >>> 7 === 1;
@@ -51,7 +61,7 @@ function parseMessage(buffer) {
     currentOffset++;
     response.writeUInt8(mask ^ source, i);
   }
-
+  // end up with object with end up with from websocket
   return JSON.parse(response.toString("utf8"));
 }
 
