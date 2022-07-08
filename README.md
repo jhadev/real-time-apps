@@ -3,9 +3,9 @@
 - backoff and retry
 - http2
 - raw-sockets - super interesting but extremely tedious
+- socket.io
 
-Finshed course - https://frontendmasters.com/courses/realtime/raw-websockets-setup/=
-git 
+https://frontendmasters.com/courses/realtime/
 
 https://btholt.github.io/complete-intro-to-realtime/
 
@@ -54,3 +54,19 @@ Using raw websockets -
 Have to directly manipulate binary sent to client - websockets/exercise-raw/backend/obj-to-response.js
 Extremely tedious - socket.io and ws are doing this for you in the library.
 Very easy to do from client side
+
+Libraries
+
+ws - https://github.com/websockets/ws
+socket.io - https://github.com/socketio/socket.io
+
+ws - helper for websockets, simple wrapper for small tasks (no client library)
+
+socket.io is a full on framework for websockets, adds more functionality, feature specific (pubsub built into socket.io - publish and subscribe)
+- has middleware support - auth, rate limiting, data store support Mongo, Redis, etc
+- fallback support (for users that don't support websockets but support long-polling)
+
+KEY FEATURES
+
+socket.io attempts to reconnect after disconnect automatically - no logic needed
+if browser doesn't support websockets, socket.io tries long polling.

@@ -19,11 +19,28 @@ const server = http.createServer((request, response) => {
   });
 });
 
-/*
- *
- * Code goes here
- *
- */
+// no options, reusing existing server but don't have to create your own
+const io = new Server(server, {});
+
+io.on("connection", (socket) => {
+  console.log(`connected: ${socket.id}`);
+  // arbitrary name to subscribe to
+  socket.emit("msg:get", { msgs: getMsgs() });
+
+  socket.on("msg:post", (data) => {
+    msg.push({
+      user: data.user,
+      text: data.text,
+      time: Date.now(),
+    });
+    // rebroadcast
+    io.emit("msg:get", { msg: getMsgs() });
+  });
+
+  socket.on("disconnect", (socket) => {
+    console.log(`disconnected ${socket.id}`);
+  });
+});
 
 const port = process.env.PORT || 8080;
 server.listen(port, () =>
